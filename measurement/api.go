@@ -1,20 +1,22 @@
 package measurement
 
-/*
-Protocol Version	v	v=1	The protocol version. The value should be 1.
-Tracking ID	tid	tid=UA-123456-1	The ID that distinguishes to which Google Analytics property to send data.
-Client ID	cid	cid=xxxxx	An ID unique to a particular user.
-Hit Type	t	t=pageview	The type of interaction collected for a particular user.
-*/
+import (
+	"time"
+)
 
 const (
 	ENDPOINT string = "www.google-analytics.com/collect"
 )
 
+// Tracking ID
+type Tracker struct {
+	Name    string // Name of the tracker e.g. rollup, main
+	TrackID string `json:"tid"` // Tracking ID e.g. UA-XXXXXXX
+}
+
 // Base structure holding basic information used by subsequent calls
 type UserData struct {
 	Protov    int    `json:"v"`   // Protocol version
-	TrackID   string `json:"tid"` // Tracking ID e.g. UA-XXXXXXX
 	ClientID  string `json:"cid"` // Client ID
 	UserID    string `json""`     // User ID e.g. SSO ID
 	UserIP    string `json:"uip"` // User IP override
@@ -32,6 +34,11 @@ type PageviewMessage struct {
 	LinkID   `json:"linkid"` // Link ID used to diff between multiple links
 }
 
+func (m *PageviewMessage) Flatten() (output string, ok bool) {
+
+	return
+}
+
 type EventMessage struct {
 	Type     string `json:"t"`  // t=event
 	Category string `json:"ec"` // Event Category. Required.
@@ -41,5 +48,31 @@ type EventMessage struct {
 }
 
 type UserSession struct {
-	Base *UserData
+	Base         *UserData
+	Started      time.Time
+	MessageCount int
+	Source       string
+	Medium       string
+	Campaign     string
+	Trackers     []*Tracker // list of trackers to transmit to
+}
+
+func (s *UserSession) Transmit(message string) (ok bool) {
+	return
+}
+
+// Send pageview
+func (s *UserSession) Pageview(m *PageviewMessage) (ok bool) {
+	message, ok := m.Flatten()
+	if !ok {
+		return
+	}
+	if sent := s.Transmit(message); sent {
+		if s.MessageCount == 0 {
+			s.Started = time.Now()
+		}
+		s.MessageCount += 1
+		ok = true
+	}
+	return
 }
