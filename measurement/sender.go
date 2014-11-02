@@ -9,6 +9,28 @@ type stack struct {
 	messages []string
 }
 
+func (s stack) Empty() bool {
+	return len(s.messages) == 0
+}
+
+func (s stack) Peek() string {
+	return s.messages[len(s.messages)-1]
+}
+
+func (s stack) Len() string {
+	return len(s.messages)
+}
+
+func (s *stack) Put(i string) {
+	s.messages = append(s.messages, i)
+}
+
+func (s *stack) Pop() string {
+	mesg := s.messages[len(s.messages)-1]
+	s.messages = s.messages[:len(s.messages)-1]
+	return mesg
+}
+
 // worker
 type Worker struct {
 }
